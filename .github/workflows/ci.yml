@@ -3,8 +3,20 @@ name: CI
 on:
   push:
     branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'build.gradle*'
+      - 'settings.gradle*'
+      - 'gradle/**'
+      - 'gradlew*'
   pull_request:
     branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'build.gradle*'
+      - 'settings.gradle*'
+      - 'gradle/**'
+      - 'gradlew*'
 
 jobs:
   build:
@@ -13,7 +25,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check if Gradle project exists
+        id: check-gradle
+        run: |
+          if [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Gradle project not found. Skipping build."
+          fi
+
       - name: Setup JDK 17
+        if: steps.check-gradle.outputs.exists == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -21,17 +44,20 @@ jobs:
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
+        if: steps.check-gradle.outputs.exists == 'true'
         run: chmod +x gradlew
 
       - name: Build with Gradle
+        if: steps.check-gradle.outputs.exists == 'true'
         run: ./gradlew build
 
       - name: Run tests
+        if: steps.check-gradle.outputs.exists == 'true'
         run: ./gradlew test
 
       - name: Upload test results
+        if: steps.check-gradle.outputs.exists == 'true' && always()
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: test-results
           path: build/reports/tests/

@@ -1,7 +1,7 @@
 name: Code Review
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
 
 jobs:
@@ -12,21 +12,20 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v44
-
-      - name: Review PR
+      - name: Get PR info
+        id: pr-info
         uses: actions/github-script@v7
         with:
           script: |
-            const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}'.split(' ');
-            const additions = ${{ github.event.pull_request.additions }};
-            const deletions = ${{ github.event.pull_request.deletions }};
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const changedFiles = files.map(f => f.filename);
+            const additions = context.payload.pull_request.additions;
+            const deletions = context.payload.pull_request.deletions;
             const changedFilesCount = changedFiles.length;
 
             let review = [];
@@ -74,15 +73,6 @@ jobs:
             if (fileTypes.others.length) review.push(`- 📦 기타: ${fileTypes.others.length}개`);
             review.push('');
 
-            // Checklist
-            review.push('### ✅ 체크리스트');
-            review.push('- [ ] 코드가 프로젝트 컨벤션을 따르는지 확인');
-            review.push('- [ ] API 엔드포인트 문서화 여부 확인');
-            review.push('- [ ] 예외 처리가 적절한지 확인');
-            review.push('- [ ] 테스트 코드 작성 여부 확인');
-            review.push('- [ ] SQL 인젝션 등 보안 취약점 확인');
-            review.push('');
-
             // Warnings
             let warnings = [];
             if (additions > 500) warnings.push('⚠️ 변경량이 500줄을 초과합니다. PR을 더 작게 나누는 것을 고려해주세요.');
@@ -100,7 +90,7 @@ jobs:
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number
+              issue_number: context.payload.pull_request.number
             });
 
             const botComment = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes('PR 자동 리뷰'));
@@ -116,7 +106,7 @@ jobs:
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: context.issue.number,
+                issue_number: context.payload.pull_request.number,
                 body: review.join('\n')
               });
             }

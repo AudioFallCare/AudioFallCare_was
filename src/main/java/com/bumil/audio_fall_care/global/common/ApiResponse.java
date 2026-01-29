@@ -12,17 +12,22 @@ public class ApiResponse<T> {
 
     private final boolean success;
     private final T data;
-    private final String error;
+    private final String code;
+    private final String message;
 
     public static <T> ApiResponse<T> ok(T data) {
-        return new ApiResponse<>(true, data, null);
+        return new ApiResponse<>(true, data, "SUCCESS", null);
     }
 
     public static ApiResponse<Void> ok() {
-        return new ApiResponse<>(true, null, null);
+        return new ApiResponse<>(true, null, "SUCCESS", null);
     }
 
-    public static <T> ApiResponse<T> error(String message) {
-        return new ApiResponse<>(false, null, message);
+    public static <T> ApiResponse<T> error(String code, String message) {
+        return new ApiResponse<>(false, null, code, message);
+    }
+
+    public static <T> ApiResponse<T> error(ErrorCode errorCode) {
+        return new ApiResponse<>(false, null, errorCode.getCode(), errorCode.getMessage());
     }
 }

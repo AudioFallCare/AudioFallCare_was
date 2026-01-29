@@ -1,6 +1,8 @@
 package com.bumil.audio_fall_care.domain.auth.service.serviceImpl;
 
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
+import com.bumil.audio_fall_care.global.common.BusinessException;
+import com.bumil.audio_fall_care.global.common.ErrorCode;
 import io.lettuce.core.RedisConnectionException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -46,13 +48,39 @@ public class AuthServiceImpl implements AuthService {
             log.info("인증번호 발송 완료: {}", toEmail);
         } catch (RedisConnectionException e) {
             log.error("Redis 연결 실패", e);
-            // throw new
+            throw new BusinessException(ErrorCode.REDIS_CONNECTION_ERROR);
         } catch (MailException e) {
             log.error("이메일 발송 실패 - 이메일: {}", toEmail, e);
-            // throw new
+            throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
         } catch (Exception e) {
             log.error("인증번호 발송 처리 중 오류 발생", e);
-            // throw new
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public void verifyCode(String toEmail, String inputCode) {
+        try {
+            String key = EMAIL_VERIFICATION_PREFIX + toEmail;
+            String storedCode = redisTemplate.opsForValue().get(key);
+
+            if (storedCode == null) {
+                log.warn("인증번호가 만료되었습니다. - 이메일: {}", toEmail);
+                throw new BusinessException(ErrorCode.VERIFICATION_CODE_EXPIRED);
+            }
+
+            if (!storedCode.equals(inputCode.trim())) {
+                log.warn("인증번호가 일치하지 않습니다. - 이메일: {}", toEmail);
+                throw new BusinessException(ErrorCode.INVALID_VERIFICATION_CODE);
+            }
+
+            redisTemplate.delete(key);
+        } catch (RedisConnectionException e) {
+            log.error("Redis 연결 실패", e);
+            throw new BusinessException(ErrorCode.REDIS_CONNECTION_ERROR);
+        } catch (Exception e) {
+            log.error("인증번호 검증 도중 오류 발생", e);
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -78,13 +106,13 @@ public class AuthServiceImpl implements AuthService {
             log.info("이메일 발송 성공: {}", toEmail);
         } catch (MessagingException e) {
             log.error("이메일 발송 실패 - 이메일: {}", toEmail, e);
-            // throw new
+            throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
         } catch (MailException e) {
             log.error("이메일 메시지 생성 실패 - 이메일: {}", toEmail, e);
-            // throw new
+            throw new BusinessException(ErrorCode.EMAIL_CREATE_MESSAGE_FAILED);
         } catch (Exception e) {
             log.error("이메일 처리 중 오류 발생", e);
-            // throw new
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 

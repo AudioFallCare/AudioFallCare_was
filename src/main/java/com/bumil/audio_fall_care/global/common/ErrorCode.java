@@ -12,6 +12,8 @@ public enum ErrorCode {
     VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "VERIFICATION_CODE_EXPIRED", "인증번호가 만료되었습니다."),
     INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_CODE", "인증번호가 일치하지 않습니다."),
     MISMATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "MISMATCHED_PASSWORD", "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
+    CODE_EXPIRED(HttpStatus.BAD_REQUEST, "CODE_EXPIRED", "만료된 연결 코드입니다."),
+    CODE_ALREADY_USED(HttpStatus.BAD_REQUEST, "CODE_ALREADY_USED", "이미 사용된 연결 코드입니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다."),
@@ -28,6 +30,7 @@ public enum ErrorCode {
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     RECORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "RECORDER_NOT_FOUND", "리코더를 찾을 수 없습니다."),
+    CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "CODE_NOT_FOUND", "연결 코드를 찾을 수 없습니다."),
 
     // 409
     DUPLICATED_USERNAME(HttpStatus.CONFLICT, "DUPLICATED_USERNAME", "이미 가입된 아이디입니다."),

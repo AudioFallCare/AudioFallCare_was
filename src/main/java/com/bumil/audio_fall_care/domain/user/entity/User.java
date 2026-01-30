@@ -26,11 +26,15 @@ public class User extends BaseTimeEntity {
     @Embedded
     private Address address;
 
+    @Column(nullable = false, length = 6, unique = true)
+    private String code;
+
     @Builder
-    public User(String username, String password, String email, Address address) {
+    public User(String username, String password, String email, Address address, String code) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.address = address;
+        this.code = code;
     }
 }

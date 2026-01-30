@@ -31,6 +31,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     RECORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "RECORDER_NOT_FOUND", "리코더를 찾을 수 없습니다."),
     CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "CODE_NOT_FOUND", "연결 코드를 찾을 수 없습니다."),
+    FCM_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "FCM_TOKEN_NOT_FOUND", "사용자의 FCM 토큰을 찾을 수 없습니다."),
 
     // 409
     DUPLICATED_USERNAME(HttpStatus.CONFLICT, "DUPLICATED_USERNAME", "이미 가입된 아이디입니다."),

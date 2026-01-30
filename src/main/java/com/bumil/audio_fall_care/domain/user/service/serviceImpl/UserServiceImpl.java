@@ -73,4 +73,10 @@ public class UserServiceImpl implements UserService {
 
         return sb.toString();
     }
+
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
 }

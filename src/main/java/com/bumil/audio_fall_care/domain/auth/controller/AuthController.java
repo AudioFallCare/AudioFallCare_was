@@ -121,7 +121,6 @@ public class AuthController {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .domain(".audiofallcare-was-test.onrender.com")
                 .maxAge(jwtUtil.getRefreshExpMills() / 1000)
                 .build();
 

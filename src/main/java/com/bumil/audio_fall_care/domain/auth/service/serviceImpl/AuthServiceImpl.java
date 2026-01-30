@@ -8,6 +8,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,6 +26,7 @@ import java.time.Duration;
 public class AuthServiceImpl implements AuthService {
 
     // Email
+    @Value("${spring.mail.username}")
     private String fromEmail;
     private static final String EMAIL_VERIFICATION_PREFIX = "EMAIL:";
     private static final int EXPIRATION_MINUTES = 3;

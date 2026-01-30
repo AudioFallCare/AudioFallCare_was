@@ -22,10 +22,6 @@ public record SignUpRequest(
         @Email(message = "이메일 형식이 아닙니다.")
         String email,
 
-        @NotBlank(message = "인증번호를 입력하세요.")
-        @Pattern(regexp = "^[0-9]{6}$", message = "인증번호는 6자리 숫자입니다.")
-        String code,
-
         @NotBlank(message = "주소를 입력하세요.")
         String address,
 

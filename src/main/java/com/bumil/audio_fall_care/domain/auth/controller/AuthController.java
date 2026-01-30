@@ -9,6 +9,7 @@ import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResult;
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
 import com.bumil.audio_fall_care.domain.user.service.UserService;
 import com.bumil.audio_fall_care.global.common.ApiResponse;
+import com.bumil.audio_fall_care.global.security.CustomUserDetails;
 import com.bumil.audio_fall_care.global.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,9 +17,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Slf4j
 public class AuthController {
 
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
@@ -109,6 +115,29 @@ public class AuthController {
         return ResponseEntity.ok(
                 ApiResponse.ok(loginResponse)
         );
+    }
+
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<String>> logout(
+            HttpServletResponse response,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUserId();
+        authService.deleteRefreshToken(userId);
+
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        log.info("로그아웃 성공 : userId = {}", userId);
+
+        return ResponseEntity.ok(ApiResponse.ok("로그아웃에 성공했습니다."));
     }
 
 

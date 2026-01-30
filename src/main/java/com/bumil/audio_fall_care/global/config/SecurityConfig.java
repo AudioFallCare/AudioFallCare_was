@@ -33,6 +33,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/signup","/api/auth/login","/api/auth/email/**").permitAll()
                         .requestMatchers("/api/code/verify").permitAll()
                         .requestMatchers("/health").permitAll()
+                        // Swagger
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**").permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 );

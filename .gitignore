@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Environment ###
+.env
+
+### Firebase ###
+audiofallcare-firebase-adminsdk-*.json

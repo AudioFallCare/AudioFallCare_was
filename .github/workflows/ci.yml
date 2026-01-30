@@ -55,10 +55,15 @@ jobs:
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           FIREBASE_CREDENTIALS_PATH: ${{ secrets.FIREBASE_CREDENTIALS_PATH }}
-          SPRING_MAIL_HOST: ${{ secrets.SPRING_MAIL_HOST }}
-          SPRING_MAIL_PORT: ${{ secrets.SPRING_MAIL_PORT }}
-          SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
-          SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_SMTP_AUTH: ${{ secrets.MAIL_SMTP_AUTH }}
+          MAIL_SMTP_STARTTLS_ENABLE: ${{ secrets.MAIL_SMTP_STARTTLS_ENABLE }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         run: ./gradlew build
 
       - name: Run tests
@@ -69,10 +74,15 @@ jobs:
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           FIREBASE_CREDENTIALS_PATH: ${{ secrets.FIREBASE_CREDENTIALS_PATH }}
-          SPRING_MAIL_HOST: ${{ secrets.SPRING_MAIL_HOST }}
-          SPRING_MAIL_PORT: ${{ secrets.SPRING_MAIL_PORT }}
-          SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
-          SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_SMTP_AUTH: ${{ secrets.MAIL_SMTP_AUTH }}
+          MAIL_SMTP_STARTTLS_ENABLE: ${{ secrets.MAIL_SMTP_STARTTLS_ENABLE }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         run: ./gradlew test
 
       - name: Upload test results

@@ -12,10 +12,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
+
+    private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -41,13 +46,31 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.DUPLICATED_EMAIL);
         }
 
+        String code;
+        do {
+            code = generateCode();
+        } while (userRepository.existsByCode(code));
+
+
         User user = User.builder()
                 .username(dto.username())
                 .password(passwordEncoder.encode(dto.password()))
                 .email(dto.email())
                 .address(new Address(dto.address(), dto.addressDetail()))
+                .code(code)
                 .build();
 
         return  userRepository.save(user).getId();
+    }
+
+
+    private String generateCode() {
+        StringBuilder sb = new StringBuilder(6);
+
+        for (int i = 0; i < 6; i++) {
+            sb.append(CHARS.charAt(RANDOM.nextInt(CHARS.length())));
+        }
+
+        return sb.toString();
     }
 }

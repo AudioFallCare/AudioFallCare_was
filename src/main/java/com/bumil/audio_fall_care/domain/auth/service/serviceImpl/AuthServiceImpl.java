@@ -155,11 +155,17 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Override
+    public void deleteRefreshToken(Long userId) {
+        String key = REFRESH_TOKEN_PREFIX + userId;
 
-
-
-
-
+        try {
+            redisTemplate.delete(key);
+            log.debug("Refresh Token 삭제 성공 - userId = {}", userId);
+        } catch (RedisConnectionException e) {
+            log.warn("Refresh Token 삭제 실패 - userId = {}", userId, e);
+        }
+    }
 
 
     private String generateVerificationCode() {

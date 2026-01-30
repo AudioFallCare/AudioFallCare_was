@@ -39,6 +39,9 @@ dependencies {
     // Firebase
     implementation 'com.google.firebase:firebase-admin:9.7.0'
 
+    // dotenv
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 

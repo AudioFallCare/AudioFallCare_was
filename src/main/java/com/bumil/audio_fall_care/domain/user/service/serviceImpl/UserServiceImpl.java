@@ -21,6 +21,12 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
     @Transactional
     public Long signUp(SignUpRequest dto) {
         if (!dto.password().equals(dto.passwordConfirm())) {

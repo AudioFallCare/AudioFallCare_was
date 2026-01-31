@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: audiofallcare
+      POSTGRES_USER: audiofallcare
+      POSTGRES_PASSWORD: audiofallcare
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U audiofallcare"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  was:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/audiofallcare
+      DATABASE_USERNAME: audiofallcare
+      DATABASE_PASSWORD: audiofallcare
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      JWT_SECRET: ${JWT_SECRET:-default-dev-secret-change-me}
+      JWT_ACCESS_EXP: ${JWT_ACCESS_EXP:-3600000}
+      JWT_REFRESH_EXP: ${JWT_REFRESH_EXP:-604800000}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
+      MAIL_SMTP_STARTTLS_ENABLE: ${MAIL_SMTP_STARTTLS_ENABLE:-true}
+      FIREBASE_CREDENTIALS_PATH: ${FIREBASE_CREDENTIALS_PATH:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  ai:
+    profiles: ["full"]
+    build:
+      context: ../AudioFallCare_ai
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      SPRING_SERVER_URL: http://was:8080
+      MODEL_PATH: ${MODEL_PATH:-models/best_model.pt}
+      THRESHOLD: ${THRESHOLD:-0.5}
+      SAMPLE_RATE: ${SAMPLE_RATE:-16000}
+    depends_on:
+      - was
+
+volumes:
+  postgres_data:
+  redis_data:

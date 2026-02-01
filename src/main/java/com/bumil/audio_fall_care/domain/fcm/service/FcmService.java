@@ -75,6 +75,7 @@ public class FcmService implements FcmServiceInterface {
                 fcmTokenService.deleteToken(fcmToken);
                 log.warn("[FCM] 만료/무효 토큰 삭제: userId={}, errorCode={}",
                         userId, e.getMessagingErrorCode());
+                // TODO 토큰 만료 시 대체 알림 수단 필요
             }
         } catch (Exception e) {
             log.error("[FCM] 예상치 못한 오류 발생: userId: {}", userId, e);

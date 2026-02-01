@@ -41,16 +41,11 @@ public class FcmController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> registerToken(@RequestBody FcmTokenRequest request,
                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        try {
             fcmTokenService.saveToken(
                     userDetails.getUserId(),
                     request
             );
+
             return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    ApiResponse.error("TOKEN_SAVE_FAILED", e.getMessage())
-            );
-        }
     }
 }

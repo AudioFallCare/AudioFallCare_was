@@ -14,6 +14,8 @@ public enum ErrorCode {
     MISMATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "MISMATCHED_PASSWORD", "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
     CODE_EXPIRED(HttpStatus.BAD_REQUEST, "CODE_EXPIRED", "만료된 연결 코드입니다."),
     CODE_ALREADY_USED(HttpStatus.BAD_REQUEST, "CODE_ALREADY_USED", "이미 사용된 연결 코드입니다."),
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "요청 값이 유효하지 않습니다."),
+    UNREADABLE_JSON(HttpStatus.BAD_REQUEST, "UNREADABLE_JSON", "요청 본문을 읽을 수 없습니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다."),
@@ -24,6 +26,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_MISMATCH(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_MISMATCH", "리프레시 토큰이 일치하지 않습니다."),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_NOT_FOUND", "리프레시 토큰을 찾을 수 없습니다."),
     ACCESS_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "ACCESS_TOKEN_INVALID", "유효하지 않은 액세스 토큰입니다."),
+
     // 403
     RECORDER_NOT_OWNED(HttpStatus.FORBIDDEN, "RECORDER_NOT_OWNED", "해당 리코더에 대한 권한이 없습니다."),
     FALL_HISTORY_NOT_OWNED(HttpStatus.FORBIDDEN, "FALL_HISTORY_NOT_OWNED", "해당 낙상 이력에 대한 권한이 없습니다."),
@@ -34,6 +37,9 @@ public enum ErrorCode {
     CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "CODE_NOT_FOUND", "연결 코드를 찾을 수 없습니다."),
     FCM_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "FCM_TOKEN_NOT_FOUND", "사용자의 FCM 토큰을 찾을 수 없습니다."),
     FALL_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "FALL_HISTORY_NOT_FOUND", "낙상 이력을 찾을 수 없습니다."),
+
+    // 405
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", "허용되지 않은 HTTP 메서드입니다."),
 
     // 409
     DUPLICATED_USERNAME(HttpStatus.CONFLICT, "DUPLICATED_USERNAME", "이미 가입된 아이디입니다."),

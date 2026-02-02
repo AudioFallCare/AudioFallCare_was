@@ -5,20 +5,15 @@ import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResponse;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResult;
 import com.bumil.audio_fall_care.domain.auth.dto.response.TokenPair;
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
+import com.bumil.audio_fall_care.domain.auth.service.EmailService;
 import com.bumil.audio_fall_care.global.security.CustomUserDetails;
 import com.bumil.audio_fall_care.global.common.BusinessException;
 import com.bumil.audio_fall_care.global.common.ErrorCode;
 import com.bumil.audio_fall_care.global.security.jwt.JwtUtil;
 import io.lettuce.core.RedisConnectionException;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -43,13 +38,11 @@ public class AuthServiceImpl implements AuthService {
     private static final String REFRESH_TOKEN_PREFIX = "RT:";
 
     // Email
-    @Value("${spring.mail.username}")
-    private String fromEmail;
     private static final String EMAIL_VERIFICATION_PREFIX = "EMAIL:";
     private static final int EXPIRATION_MINUTES = 3;
 
     private final JwtUtil jwtUtil;
-    private final JavaMailSender mailSender;
+    private final EmailService emailService;
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthenticationManager authenticationManager;
 
@@ -72,9 +65,6 @@ public class AuthServiceImpl implements AuthService {
         } catch (RedisConnectionException e) {
             log.error("Redis 연결 실패", e);
             throw new BusinessException(ErrorCode.REDIS_CONNECTION_ERROR);
-        } catch (MailException e) {
-            log.error("이메일 발송 실패 - 이메일: {}", toEmail, e);
-            throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
         } catch (Exception e) {
             log.error("인증번호 발송 처리 중 오류 발생", e);
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -178,30 +168,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private void sendEmailCode(String toEmail, String verificationCode) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail);
-            helper.setTo(toEmail);
-            helper.setSubject("낙상지킴이 회원가입 이메일 인증");
-
-            String htmlContent = createEmailTemplate(verificationCode);
-
-            helper.setText(htmlContent, true);
-            mailSender.send(message);
-
-            log.info("이메일 발송 성공: {}", toEmail);
-        } catch (MessagingException e) {
-            log.error("이메일 발송 실패 - 이메일: {}", toEmail, e);
-            throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
-        } catch (MailException e) {
-            log.error("이메일 메시지 생성 실패 - 이메일: {}", toEmail, e);
-            throw new BusinessException(ErrorCode.EMAIL_CREATE_MESSAGE_FAILED);
-        } catch (Exception e) {
-            log.error("이메일 처리 중 오류 발생", e);
-            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
+        String htmlContent = createEmailTemplate(verificationCode);
+        emailService.send(toEmail, "낙상지킴이 회원가입 이메일 인증", htmlContent);
     }
 
     private String createEmailTemplate(String verificationCode) {

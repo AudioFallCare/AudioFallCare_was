@@ -47,4 +47,14 @@ public class FcmTokenService implements FcmTokenServiceInterface {
     public void deleteToken(FcmToken token) {
         fcmTokenRepository.delete(token);
     }
+
+    @Transactional
+    @Override
+    public void deleteToken(Long userId, String deviceInfo) {
+        fcmTokenRepository.findByUserIdAndDeviceInfo(userId, deviceInfo)
+                .ifPresentOrElse(
+                        fcmTokenRepository::delete,
+                        () -> log.warn("[FCM] 삭제할 토큰이 존재하지 않음: userId = {}, deviceInfo = {}", userId, deviceInfo)
+                );
+    }
 }

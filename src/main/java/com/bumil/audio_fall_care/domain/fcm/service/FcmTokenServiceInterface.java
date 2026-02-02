@@ -10,4 +10,7 @@ public interface FcmTokenServiceInterface {
     void saveOrUpdateToken(Long userId, FcmTokenRequest fcmTokenRequest);
     List<FcmToken> findAllByUserId(Long userId);
     void deleteToken(FcmToken token);
+    
+    /** 로그아웃에 사용 */
+    void deleteToken(Long userId, String deviceInfo);
 }

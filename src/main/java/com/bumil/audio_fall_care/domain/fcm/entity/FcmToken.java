@@ -8,7 +8,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "fcm_tokens")
+@Table(
+        name = "fcm_tokens",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_user_device",
+                        columnNames = {"user_id", "device_info"}
+                )
+        }
+)
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,7 +26,7 @@ public class FcmToken extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
@@ -33,5 +41,9 @@ public class FcmToken extends BaseTimeEntity {
         this.user = user;
         this.token = token;
         this.deviceInfo = deviceInfo;
+    }
+
+    public void updateToken(String newToken) {
+        this.token = newToken;
     }
 }

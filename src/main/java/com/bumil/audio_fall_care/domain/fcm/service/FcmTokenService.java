@@ -3,44 +3,46 @@ package com.bumil.audio_fall_care.domain.fcm.service;
 import com.bumil.audio_fall_care.domain.fcm.dto.FcmTokenRequest;
 import com.bumil.audio_fall_care.domain.fcm.entity.FcmToken;
 import com.bumil.audio_fall_care.domain.fcm.repository.FcmTokenRepository;
-import com.bumil.audio_fall_care.domain.user.entity.User;
 import com.bumil.audio_fall_care.domain.user.service.UserService;
-import com.bumil.audio_fall_care.global.common.BusinessException;
-import com.bumil.audio_fall_care.global.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class FcmTokenService implements FcmTokenServiceInterface {
 
     private final FcmTokenRepository fcmTokenRepository;
     private final UserService userService;
 
-    // FCM 토큰 등록
+    // FCM 토큰 등록, 갱신
+    @Transactional
     @Override
-    public void saveToken(Long userId, FcmTokenRequest request) {
-        User user = userService.findById(userId);
+    public void saveOrUpdateToken(Long userId, FcmTokenRequest request) {
+        FcmToken token =
+                fcmTokenRepository.findByUserIdAndDeviceInfo(userId, request.deviceInfo())
+                        .orElseGet(() -> FcmToken.builder()
+                                .user(userService.findById(userId))
+                                .deviceInfo(request.deviceInfo())
+                                .build());
 
-        FcmToken newFcmToken = FcmToken.builder()
-                .user(user)
-                .token(request.token())
-                .deviceInfo(request.deviceInfo())
-                .build();
+        token.updateToken(request.token());
+        fcmTokenRepository.save(token);
 
-        fcmTokenRepository.save(newFcmToken);
-
-        log.info("FCM Token 생성: userId = {}", userId);
+        log.info("FCM Token 등록: userId = {}", userId);
     }
 
     @Override
-    public FcmToken findByUserId(Long userId) {
-        return fcmTokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.FCM_TOKEN_NOT_FOUND));
+    public List<FcmToken> findAllByUserId(Long userId) {
+        return fcmTokenRepository.findAllByUserId(userId);
     }
 
+    @Transactional
     @Override
     public void deleteToken(FcmToken token) {
         fcmTokenRepository.delete(token);

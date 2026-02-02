@@ -12,11 +12,15 @@ import lombok.NoArgsConstructor;
 public class Address {
 
     @Column(nullable = false)
+    private String zipcode;
+
+    @Column(nullable = false)
     private String address;
 
     private String addressDetail;
 
-    public  Address(String address, String addressDetail) {
+    public  Address(String zipcode, String address, String addressDetail) {
+        this.zipcode = zipcode;
         this.address = address;
         this.addressDetail = addressDetail;
     }

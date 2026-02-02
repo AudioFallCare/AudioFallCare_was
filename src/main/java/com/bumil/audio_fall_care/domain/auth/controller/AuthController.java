@@ -3,6 +3,7 @@ package com.bumil.audio_fall_care.domain.auth.controller;
 import com.bumil.audio_fall_care.domain.auth.dto.request.*;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResponse;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResult;
+import com.bumil.audio_fall_care.domain.auth.dto.response.TokenPair;
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
 import com.bumil.audio_fall_care.domain.user.service.UserService;
 import com.bumil.audio_fall_care.global.common.ApiResponse;
@@ -21,10 +22,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "인증", description = "회원가입, 이메일 인증 API")
 @RestController
@@ -90,6 +88,17 @@ public class AuthController {
                 .body(ApiResponse.ok(userId));
     }
 
+    @Operation(
+            summary = "로그인",
+            description = "아이디와 비밀번호로 로그인합니다. " +
+                    "Access Token은 Authorization 헤더로, " +
+                    "Refresh Token은 HttpOnly Cookie로 반환됩니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "아이디 또는 비밀번호 불일치")
+    })
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginRequest dto,
@@ -114,6 +123,17 @@ public class AuthController {
         );
     }
 
+    @Operation(
+            summary = "로그아웃",
+            description = "현재 로그인된 사용자를 로그아웃합니다. " +
+                    "기기(device)별 Refresh Token을 삭제하고, " +
+                    "Refresh Token 쿠키를 만료 처리합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그아웃 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<String>> logout(
@@ -136,6 +156,38 @@ public class AuthController {
         log.info("로그아웃 성공 : userId = {}", userId);
 
         return ResponseEntity.ok(ApiResponse.ok("로그아웃에 성공했습니다."));
+    }
+
+    @Operation(
+            summary = "토큰 재발급",
+            description = "만료된 Access Token을 재발급합니다. " +
+                    "Refresh Token은 HttpOnly Cookie에서 읽어오며, " +
+                    "재발급 성공 시 Access Token은 Authorization 헤더로, " +
+                    "Refresh Token은 새 Cookie로 반환됩니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "토큰 재발급 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "유효하지 않거나 만료된 Refresh Token"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<String>> refreshToken(
+            @RequestBody @Valid RefreshTokenRequest dto,
+            @CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        TokenPair tokenPair = authService.reissueTokens(refreshToken, dto.deviceInfo());
+
+        response.setHeader("Authorization", "Bearer " + tokenPair.accessToken());
+
+        addCookie(response, tokenPair.refreshToken());
+
+        log.info("토큰 재발급 성공 : userId = {}", jwtUtil.getUserId(tokenPair.refreshToken()));
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("토큰 재발급에 성공했습니다.")
+        );
     }
 
 

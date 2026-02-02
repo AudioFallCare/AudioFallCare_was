@@ -1,11 +1,11 @@
 package com.bumil.audio_fall_care.domain.auth.service.serviceImpl;
 
 import com.bumil.audio_fall_care.domain.auth.dto.request.LoginRequest;
-import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResponse;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResult;
 import com.bumil.audio_fall_care.domain.auth.dto.response.TokenPair;
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
 import com.bumil.audio_fall_care.domain.auth.service.EmailService;
+import com.bumil.audio_fall_care.domain.fcm.service.FcmTokenService;
 import com.bumil.audio_fall_care.global.security.CustomUserDetails;
 import com.bumil.audio_fall_care.global.common.BusinessException;
 import com.bumil.audio_fall_care.global.common.ErrorCode;
@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
+    private final FcmTokenService fcmTokenService;
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthenticationManager authenticationManager;
 
@@ -116,8 +117,8 @@ public class AuthServiceImpl implements AuthService {
             );
             String refreshToken = jwtUtil.createRefreshToken(userId);
 
-            // 기존 Refresh Token 삭제 (중복 로그인 방지)
-            String redisKey = REFRESH_TOKEN_PREFIX + userId;
+            // 기존 Refresh Token 삭제 (중복 로그인 가능)
+            String redisKey = REFRESH_TOKEN_PREFIX + userId + ":" + dto.deviceInfo();
             redisTemplate.delete(redisKey);
 
             redisTemplate.opsForValue().set(
@@ -150,12 +151,20 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void deleteRefreshToken(Long userId) {
-        String key = REFRESH_TOKEN_PREFIX + userId;
+    public void logout(Long userId, String deviceInfo) {
+        String key = REFRESH_TOKEN_PREFIX + userId + ":" + deviceInfo;
+
+        fcmTokenService.deleteToken(userId, deviceInfo);
 
         try {
-            redisTemplate.delete(key);
-            log.debug("Refresh Token 삭제 성공 - userId = {}", userId);
+            Boolean deleted = redisTemplate.delete(key);
+
+            if (deleted) {
+                log.info("Refresh Token 삭제 성공 - userId={}, device={}", userId, deviceInfo);
+            } else {
+                log.warn("Refresh Token 삭제 대상 없음 - userId={}, device={}", userId, deviceInfo);
+            }
+
         } catch (RedisConnectionException e) {
             log.warn("Refresh Token 삭제 실패 - userId = {}", userId, e);
         }

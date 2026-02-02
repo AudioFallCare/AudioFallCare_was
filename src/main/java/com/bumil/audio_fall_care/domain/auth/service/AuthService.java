@@ -7,5 +7,5 @@ public interface AuthService {
     void sendVerificationCode(String toEmail);
     void verifyCode(String toEmail, String inputCode);
     LoginResult login(LoginRequest dto);
-    void deleteRefreshToken(Long userId);
+    void logout(Long userId, String deviceInfo);
 }

@@ -1,9 +1,6 @@
 package com.bumil.audio_fall_care.domain.auth.controller;
 
-import com.bumil.audio_fall_care.domain.auth.dto.request.EmailRequest;
-import com.bumil.audio_fall_care.domain.auth.dto.request.EmailVerificationRequest;
-import com.bumil.audio_fall_care.domain.auth.dto.request.LoginRequest;
-import com.bumil.audio_fall_care.domain.auth.dto.request.SignUpRequest;
+import com.bumil.audio_fall_care.domain.auth.dto.request.*;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResponse;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResult;
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
@@ -120,11 +117,12 @@ public class AuthController {
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<String>> logout(
+            @RequestBody @Valid LogoutRequest dto,
             HttpServletResponse response,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getUserId();
-        authService.deleteRefreshToken(userId);
+        authService.logout(userId, dto.deviceInfo());
 
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
                 .httpOnly(true)

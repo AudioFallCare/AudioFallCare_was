@@ -50,7 +50,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 인증 불필요 경로
                         .requestMatchers("/api/internal/**").permitAll()
-                        .requestMatchers("/api/auth/signup","/api/auth/login","/api/auth/email/**").permitAll()
+                        .requestMatchers(
+                                "/api/auth/signup",
+                                "/api/auth/login",
+                                "/api/auth/email/**",
+                                "/api/auth/refresh"
+                        ).permitAll()
                         .requestMatchers("/api/code/verify").permitAll()
                         .requestMatchers("/health").permitAll()
                         // Swagger

@@ -16,7 +16,6 @@ import java.util.UUID;
 public class JwtUtil {
     private static final String CLAIM_UID = "uid";
     private static final String CLAIM_USERNAME = "username";
-    private static final String CLAIM_EMAIL = "email";
     private static final String CLAIM_TYPE = "token_type";
     private static final String TYPE_ACCESS = "access";
     private static final String TYPE_REFRESH = "refresh";
@@ -35,8 +34,8 @@ public class JwtUtil {
         this.refreshExp = refreshExp;
     }
 
-    //
-    public String createAccessToken(Long userId, String username, String email) {
+
+    public String createAccessToken(Long userId, String username) {
         long now = System.currentTimeMillis();
         Date iat = new Date(now);
         Date exp = new Date(now + accessExp);
@@ -48,7 +47,6 @@ public class JwtUtil {
                 .expiration(exp)
                 .claim(CLAIM_UID, userId)
                 .claim(CLAIM_USERNAME, username)
-                .claim(CLAIM_EMAIL, email)
                 .claim(CLAIM_TYPE, TYPE_ACCESS)
                 .signWith(secretKey)
                 .compact();

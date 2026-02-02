@@ -42,10 +42,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.DUPLICATED_USERNAME);
         }
 
-        if (userRepository.existsByEmail(dto.email())) {
-            throw new BusinessException(ErrorCode.DUPLICATED_EMAIL);
-        }
-
         String code;
         do {
             code = generateCode();
@@ -55,8 +51,7 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .username(dto.username())
                 .password(passwordEncoder.encode(dto.password()))
-                .email(dto.email())
-                .address(new Address(dto.address(), dto.addressDetail()))
+                .address(new Address(dto.zipcode(), dto.address(), dto.addressDetail()))
                 .code(code)
                 .build();
 

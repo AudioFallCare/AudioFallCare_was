@@ -14,12 +14,10 @@ public class CustomUserDetails implements UserDetails, CredentialsContainer {
     private final Long userId;
     private final String username;
     private String password;
-    private final String email;
 
-    public CustomUserDetails(Long userId, String username, String email) {
+    public CustomUserDetails(Long userId, String username) {
         this.userId = userId;
         this.username = username;
-        this.email = email;
         this.password = null;
     }
 
@@ -27,7 +25,6 @@ public class CustomUserDetails implements UserDetails, CredentialsContainer {
         this.userId = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();
-        this.email = user.getEmail();
     }
 
     @Override

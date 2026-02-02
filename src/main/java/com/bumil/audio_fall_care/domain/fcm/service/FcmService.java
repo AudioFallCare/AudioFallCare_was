@@ -15,6 +15,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,36 +50,36 @@ public class FcmService implements FcmServiceInterface {
 
     @Override
     public void sendToUser(Long userId, String title, String body) {
-        FcmToken fcmToken = fcmTokenService.findByUserId(userId);
-        String token = fcmToken.getToken();
+        List<FcmToken> tokens = fcmTokenService.findAllByUserId(userId);
 
-        Message message = Message.builder()
-                .setToken(token)
-                .setWebpushConfig(WebpushConfig.builder()
-                        .setNotification(WebpushNotification.builder()
-                                .setTitle(title)
-                                .setBody(body)
-                                .setIcon("/icons/alert-icon.png")
-                                .setVibrate(new int[]{200, 100, 200})
-                                .build())
-                        .build())
-                .build();
+        for (FcmToken token : tokens) {
+            Message message = Message.builder()
+                    .setToken(token.getToken())
+                    .setWebpushConfig(WebpushConfig.builder()
+                            .setNotification(WebpushNotification.builder()
+                                    .setTitle(title)
+                                    .setBody(body)
+                                    .setIcon("/icons/alert-icon.png")
+                                    .setVibrate(new int[]{200, 100, 200})
+                                    .build())
+                            .build())
+                    .build();
 
-        try {
-            firebaseMessaging.send(message);
-            log.info("[FCM] 알림 전송 성공: userId: {}", userId);
-        } catch (FirebaseMessagingException e) {
-            log.error("[FCM] 알림 전송 실패: userId: {}, errorCode: {}, message: {}",
-                    userId, e.getMessagingErrorCode(), e.getMessage(), e);
+            try {
+                firebaseMessaging.send(message);
+                log.info("[FCM] 알림 전송 성공: userId: {}", userId);
+            } catch (FirebaseMessagingException e) {
+                log.error("[FCM] 알림 전송 실패: userId: {}, errorCode: {}, message: {}",
+                        userId, e.getMessagingErrorCode(), e.getMessage(), e);
 
-            if (isTokenInvalid(e)) {
-                fcmTokenService.deleteToken(fcmToken);
-                log.warn("[FCM] 만료/무효 토큰 삭제: userId={}, errorCode={}",
-                        userId, e.getMessagingErrorCode());
-                // TODO 토큰 만료 시 대체 알림 수단 필요
+                if (isTokenInvalid(e)) {
+                    fcmTokenService.deleteToken(token);
+                    log.warn("[FCM] 만료/무효 토큰 삭제: userId={}, errorCode={}",
+                            userId, e.getMessagingErrorCode());
+                }
+            } catch (Exception e) {
+                log.error("[FCM] 예상치 못한 오류 발생: userId: {}", userId, e);
             }
-        } catch (Exception e) {
-            log.error("[FCM] 예상치 못한 오류 발생: userId: {}", userId, e);
         }
     }
 

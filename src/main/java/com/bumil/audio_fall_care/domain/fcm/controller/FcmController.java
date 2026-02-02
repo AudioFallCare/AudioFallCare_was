@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "FCM", description = "FCM 토큰 등록 API")
+@Tag(name = "FCM", description = "FCM 토큰 등록 및 갱신 API")
 @RestController
 @RequestMapping("/api/fcm")
 @Slf4j
@@ -28,9 +28,9 @@ public class FcmController {
     private final FcmTokenServiceInterface fcmTokenService;
 
     @Operation(
-            summary = "FCM 토큰 등록",
+            summary = "FCM 토큰 등록 및 갱신",
             description = """
-                    푸시 알림을 받기 위한 FCM 토큰을 서버에 등록합니다.
+                    푸시 알림을 받기 위한 FCM 토큰을 서버에 등록 및 갱신합니다.
                     앱 설치/재설치 시 또는 토큰 갱신 시 호출해야 합니다.
                     """
     )
@@ -43,7 +43,7 @@ public class FcmController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> registerToken(@RequestBody FcmTokenRequest request,
                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-            fcmTokenService.saveToken(
+            fcmTokenService.saveOrUpdateToken(
                     userDetails.getUserId(),
                     request
             );

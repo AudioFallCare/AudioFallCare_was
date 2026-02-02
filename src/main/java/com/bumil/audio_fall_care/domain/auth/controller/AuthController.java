@@ -3,6 +3,7 @@ package com.bumil.audio_fall_care.domain.auth.controller;
 import com.bumil.audio_fall_care.domain.auth.dto.request.*;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResponse;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResult;
+import com.bumil.audio_fall_care.domain.auth.dto.response.TokenPair;
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
 import com.bumil.audio_fall_care.domain.user.service.UserService;
 import com.bumil.audio_fall_care.global.common.ApiResponse;
@@ -21,10 +22,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "인증", description = "회원가입, 이메일 인증 API")
 @RestController
@@ -136,6 +134,25 @@ public class AuthController {
         log.info("로그아웃 성공 : userId = {}", userId);
 
         return ResponseEntity.ok(ApiResponse.ok("로그아웃에 성공했습니다."));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<String>> refreshToken(
+            @RequestBody @Valid RefreshTokenRequest dto,
+            @CookieValue(name = REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        TokenPair tokenPair = authService.reissueTokens(refreshToken, dto.deviceInfo());
+
+        response.setHeader("Authorization", "Bearer " + tokenPair.accessToken());
+
+        addCookie(response, tokenPair.refreshToken());
+
+        log.info("토큰 재발급 성공 : userId = {}", jwtUtil.getUserId(tokenPair.refreshToken()));
+
+        return ResponseEntity.ok(
+                ApiResponse.ok("토큰 재발급에 성공했습니다.")
+        );
     }
 
 

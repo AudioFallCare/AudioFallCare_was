@@ -95,10 +95,24 @@ public class JwtUtil {
         }
     }
 
+    public Long getUserId(String refreshToken) {
+        Claims claims = parseToken(refreshToken);
+        return claims.get(CLAIM_UID, Long.class);
+    }
+
     public boolean isAccessToken(String token) {
         try {
             Claims claims = parseToken(token);
             return TYPE_ACCESS.equals(claims.get(CLAIM_TYPE));
+        } catch (JwtException e) {
+            return false;
+        }
+    }
+
+    public boolean isRefreshToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            return TYPE_REFRESH.equals(claims.get(CLAIM_TYPE));
         } catch (JwtException e) {
             return false;
         }

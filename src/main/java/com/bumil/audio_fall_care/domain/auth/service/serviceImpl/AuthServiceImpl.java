@@ -6,6 +6,8 @@ import com.bumil.audio_fall_care.domain.auth.dto.response.TokenPair;
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
 import com.bumil.audio_fall_care.domain.auth.service.EmailService;
 import com.bumil.audio_fall_care.domain.fcm.service.FcmTokenService;
+import com.bumil.audio_fall_care.domain.user.entity.User;
+import com.bumil.audio_fall_care.domain.user.service.UserService;
 import com.bumil.audio_fall_care.global.security.CustomUserDetails;
 import com.bumil.audio_fall_care.global.common.BusinessException;
 import com.bumil.audio_fall_care.global.common.ErrorCode;
@@ -23,6 +25,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -42,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private static final int EXPIRATION_MINUTES = 3;
 
     private final JwtUtil jwtUtil;
+    private final UserService userService;
     private final EmailService emailService;
     private final FcmTokenService fcmTokenService;
     private final RedisTemplate<String, String> redisTemplate;
@@ -167,6 +171,61 @@ public class AuthServiceImpl implements AuthService {
 
         } catch (RedisConnectionException e) {
             log.warn("Refresh Token 삭제 실패 - userId = {}", userId, e);
+        }
+    }
+
+    @Override
+    public TokenPair reissueTokens(String refreshToken, String deviceInfo) {
+
+        if (!StringUtils.hasText(refreshToken)) {
+            log.warn("Refresh Token을 찾을 수 없습니다.");
+            throw new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+
+        if (!jwtUtil.isRefreshToken(refreshToken)) {
+            log.warn("유효하지 않은 Refresh Token입니다.");
+            throw new BusinessException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
+
+        Long userId = jwtUtil.getUserId(refreshToken);
+        String redisKey = REFRESH_TOKEN_PREFIX + userId + ":" + deviceInfo;
+
+        try {
+            String storedRefreshToken = redisTemplate.opsForValue().get(redisKey);
+
+            if (!StringUtils.hasText(storedRefreshToken)) {
+                log.warn("리프레시 토큰이 만료되었습니다.");
+                throw new BusinessException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+            }
+
+            if (!refreshToken.equals(storedRefreshToken)) {
+                log.warn("리프레시 토큰이 일치하지 않습니다.");
+                throw new BusinessException(ErrorCode.REFRESH_TOKEN_MISMATCH);
+            }
+
+            User user = userService.findById(userId);
+
+            String newAccessToken = jwtUtil.createAccessToken(
+                    userId,
+                    user.getUsername(),
+                    user.getEmail()
+            );
+            String newRefreshToken = jwtUtil.createRefreshToken(userId);
+
+            redisTemplate.opsForValue().set(
+                    redisKey,
+                    newRefreshToken,
+                    jwtUtil.getRefreshExpMills(),
+                    TimeUnit.MILLISECONDS
+            );
+
+            return new TokenPair(refreshToken, newAccessToken);
+        } catch (RedisConnectionException e) {
+            log.error("Redis 연결 실패", e);
+            throw new BusinessException(ErrorCode.REDIS_CONNECTION_ERROR);
+        } catch (Exception e) {
+            log.error("토큰 재발급 처리 중 오류 발생", e);
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 

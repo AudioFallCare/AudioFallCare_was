@@ -7,5 +7,6 @@ import java.util.List;
 public interface AlertService {
 
     List<AlertResponse> findAllByUserId(Long userId);
+    long countUnreadAlerts(Long userId);
     void markAsRead(Long alertId, Long userId);
 }

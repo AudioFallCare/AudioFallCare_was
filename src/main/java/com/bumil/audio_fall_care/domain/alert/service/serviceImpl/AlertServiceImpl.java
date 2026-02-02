@@ -27,6 +27,11 @@ public class AlertServiceImpl implements AlertService {
                 .toList();
     }
 
+    @Override
+    public long countUnreadAlerts(Long userId) {
+        return alertRepository.countByUserIdAndIsReadFalse(userId);
+    }
+
     @Transactional
     @Override
     public void markAsRead(Long alertId, Long userId) {

@@ -26,6 +26,13 @@ public class AlertController {
         return ResponseEntity.ok(ApiResponse.ok(alerts));
     }
 
+    @GetMapping("/unread/count")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Long>> countUnreadAlerts(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        long count = alertService.countUnreadAlerts(userDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.ok(count));
+    }
+
     @PatchMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> markAsRead(@PathVariable("id") Long alertId,

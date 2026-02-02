@@ -26,12 +26,14 @@ public enum ErrorCode {
     ACCESS_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "ACCESS_TOKEN_INVALID", "유효하지 않은 액세스 토큰입니다."),
     // 403
     RECORDER_NOT_OWNED(HttpStatus.FORBIDDEN, "RECORDER_NOT_OWNED", "해당 리코더에 대한 권한이 없습니다."),
+    FALL_HISTORY_NOT_OWNED(HttpStatus.FORBIDDEN, "FALL_HISTORY_NOT_OWNED", "해당 낙상 이력에 대한 권한이 없습니다."),
 
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     RECORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "RECORDER_NOT_FOUND", "리코더를 찾을 수 없습니다."),
     CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "CODE_NOT_FOUND", "연결 코드를 찾을 수 없습니다."),
     FCM_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "FCM_TOKEN_NOT_FOUND", "사용자의 FCM 토큰을 찾을 수 없습니다."),
+    FALL_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "FALL_HISTORY_NOT_FOUND", "낙상 이력을 찾을 수 없습니다."),
 
     // 409
     DUPLICATED_USERNAME(HttpStatus.CONFLICT, "DUPLICATED_USERNAME", "이미 가입된 아이디입니다."),

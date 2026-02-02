@@ -26,7 +26,7 @@ public class User extends BaseTimeEntity {
     @Embedded
     private Address address;
 
-    @Column(nullable = false, length = 6, unique = true)
+    @Column(length = 6, unique = true)
     private String code;
 
     @Builder

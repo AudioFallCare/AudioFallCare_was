@@ -67,6 +67,8 @@ public class AuthServiceImpl implements AuthService {
 
             sendEmailCode(toEmail, verificationCode);
             log.info("인증번호 발송 완료: {}", toEmail);
+        } catch (BusinessException e) {
+            throw e;
         } catch (RedisConnectionException e) {
             log.error("Redis 연결 실패", e);
             throw new BusinessException(ErrorCode.REDIS_CONNECTION_ERROR);
@@ -96,6 +98,8 @@ public class AuthServiceImpl implements AuthService {
             }
 
             redisTemplate.delete(key);
+        } catch (BusinessException e) {
+            throw e;
         } catch (RedisConnectionException e) {
             log.error("Redis 연결 실패", e);
             throw new BusinessException(ErrorCode.REDIS_CONNECTION_ERROR);

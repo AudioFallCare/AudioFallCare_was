@@ -7,4 +7,5 @@ import java.util.List;
 public interface AlertService {
 
     List<AlertResponse> findAllByUserId(Long userId);
+    void markAsRead(Long alertId, Long userId);
 }

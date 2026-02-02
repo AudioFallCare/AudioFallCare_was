@@ -1,6 +1,7 @@
 package com.bumil.audio_fall_care.domain.alert.service.serviceImpl;
 
 import com.bumil.audio_fall_care.domain.alert.dto.response.AlertResponse;
+import com.bumil.audio_fall_care.domain.alert.entity.Alert;
 import com.bumil.audio_fall_care.domain.alert.repository.AlertRepository;
 import com.bumil.audio_fall_care.domain.alert.service.AlertService;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,12 @@ public class AlertServiceImpl implements AlertService {
                 .stream()
                 .map(AlertResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public void markAsRead(Long alertId, Long userId) {
+        alertRepository.findByIdAndUserId(alertId, userId)
+                .ifPresent(Alert::markAsRead);
     }
 }

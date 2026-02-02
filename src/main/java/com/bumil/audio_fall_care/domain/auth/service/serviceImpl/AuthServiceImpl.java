@@ -116,8 +116,7 @@ public class AuthServiceImpl implements AuthService {
 
             String accessToken = jwtUtil.createAccessToken(
                     userId,
-                    userDetails.getUsername(),
-                    userDetails.getEmail()
+                    userDetails.getUsername()
             );
             String refreshToken = jwtUtil.createRefreshToken(userId);
 
@@ -207,8 +206,7 @@ public class AuthServiceImpl implements AuthService {
 
             String newAccessToken = jwtUtil.createAccessToken(
                     userId,
-                    user.getUsername(),
-                    user.getEmail()
+                    user.getUsername()
             );
             String newRefreshToken = jwtUtil.createRefreshToken(userId);
 

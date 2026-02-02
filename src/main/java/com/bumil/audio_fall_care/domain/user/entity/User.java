@@ -20,9 +20,6 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
     @Embedded
     private Address address;
 
@@ -30,10 +27,9 @@ public class User extends BaseTimeEntity {
     private String code;
 
     @Builder
-    public User(String username, String password, String email, Address address, String code) {
+    public User(String username, String password, Address address, String code) {
         this.username = username;
         this.password = password;
-        this.email = email;
         this.address = address;
         this.code = code;
     }

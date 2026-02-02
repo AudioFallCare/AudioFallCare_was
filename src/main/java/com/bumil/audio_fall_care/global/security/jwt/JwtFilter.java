@@ -102,7 +102,8 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.warn("JWT 필터 처리 중 예외 발생: {}", e.getMessage());
             SecurityContextHolder.clearContext();
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
     }
 
@@ -131,9 +132,8 @@ public class JwtFilter extends OncePerRequestFilter {
             Number uidNum = claims.get("uid", Number.class);
             Long userId = uidNum != null ? uidNum.longValue() : null;
             String username = claims.get("username", String.class);
-            String email = claims.get("email", String.class);
 
-            CustomUserDetails userDetails = new CustomUserDetails(userId, username, email);
+            CustomUserDetails userDetails = new CustomUserDetails(userId, username);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     userDetails,

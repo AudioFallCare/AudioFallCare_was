@@ -120,9 +120,10 @@ class UserServiceTest {
                 return user;
             });
 
-            Long userId = userService.signUp(request);
+            User result = userService.signUp(request);
 
-            assertThat(userId).isEqualTo(1L);
+            assertThat(result.getId()).isEqualTo(1L);
+            assertThat(result.getCode()).isNotNull();
         }
 
         @Test

@@ -3,7 +3,9 @@ package com.bumil.audio_fall_care.domain.auth.controller;
 import com.bumil.audio_fall_care.domain.auth.dto.request.*;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResponse;
 import com.bumil.audio_fall_care.domain.auth.dto.response.LoginResult;
+import com.bumil.audio_fall_care.domain.auth.dto.response.SignUpResponse;
 import com.bumil.audio_fall_care.domain.auth.dto.response.TokenPair;
+import com.bumil.audio_fall_care.domain.user.entity.User;
 import com.bumil.audio_fall_care.domain.auth.service.AuthService;
 import com.bumil.audio_fall_care.domain.user.service.UserService;
 import com.bumil.audio_fall_care.global.common.ApiResponse;
@@ -79,13 +81,14 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 존재하는 이메일")
     })
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Long>> signUp(
+    public ResponseEntity<ApiResponse<SignUpResponse>> signUp(
             @Valid @RequestBody SignUpRequest dto
             ) {
 
-        Long userId = userService.signUp(dto);
+        User user = userService.signUp(dto);
+        SignUpResponse signUpResponse = new SignUpResponse(user.getId(), user.getCode());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(userId));
+                .body(ApiResponse.ok(signUpResponse));
     }
 
     @Operation(
@@ -115,7 +118,8 @@ public class AuthController {
 
         LoginResponse loginResponse = new LoginResponse(
                 loginResult.userId(),
-                loginResult.username()
+                loginResult.username(),
+                loginResult.tokenPair().accessToken()
         );
 
         return ResponseEntity.ok(

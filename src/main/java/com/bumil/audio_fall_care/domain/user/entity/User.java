@@ -33,4 +33,8 @@ public class User extends BaseTimeEntity {
         this.address = address;
         this.code = code;
     }
+
+    public void updateCode(String code) {
+        this.code = code;
+    }
 }

@@ -21,7 +21,9 @@ public class Recorder extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private String deviceName;
+    @Column(nullable = false)
+    @Builder.Default
+    private String deviceName = "리코더";
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

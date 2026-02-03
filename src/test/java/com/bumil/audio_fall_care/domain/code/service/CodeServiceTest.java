@@ -2,8 +2,6 @@ package com.bumil.audio_fall_care.domain.code.service;
 
 import com.bumil.audio_fall_care.domain.code.dto.response.CodeGenerateResponse;
 import com.bumil.audio_fall_care.domain.code.dto.response.CodeVerifyResponse;
-import com.bumil.audio_fall_care.domain.code.entity.ConnectCode;
-import com.bumil.audio_fall_care.domain.code.repository.ConnectCodeRepository;
 import com.bumil.audio_fall_care.domain.user.entity.User;
 import com.bumil.audio_fall_care.domain.user.repository.UserRepository;
 import com.bumil.audio_fall_care.global.common.BusinessException;
@@ -17,14 +15,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CodeServiceTest {
@@ -33,13 +29,10 @@ class CodeServiceTest {
     private CodeService codeService;
 
     @Mock
-    private ConnectCodeRepository connectCodeRepository;
-
-    @Mock
     private UserRepository userRepository;
 
-    private User createUser(Long id) {
-        User user = User.builder().username("testuser").password("password").build();
+    private User createUser(Long id, String code) {
+        User user = User.builder().username("testuser").password("password").code(code).build();
         setId(user, id);
         return user;
     }
@@ -55,50 +48,24 @@ class CodeServiceTest {
     }
 
     @Nested
-    @DisplayName("코드 생성")
+    @DisplayName("코드 조회")
     class GenerateCode {
 
         @Test
-        @DisplayName("기존 코드가 있으면 그대로 반환")
+        @DisplayName("기존 User.code 반환")
         void returnsExistingCode() {
-            User user = createUser(1L);
-            ConnectCode existing = ConnectCode.builder()
-                    .user(user).code("EXIST123").used(false).build();
-            setId(existing, 10L);
+            User user = createUser(1L, "ABC123");
 
-            given(connectCodeRepository.findByUserId(1L)).willReturn(Optional.of(existing));
-
-            CodeGenerateResponse response = codeService.generateCode(1L);
-
-            assertThat(response.code()).isEqualTo("EXIST123");
-            assertThat(response.id()).isEqualTo(10L);
-        }
-
-        @Test
-        @DisplayName("기존 코드가 없으면 새로 생성")
-        void createsNewCode() {
-            User user = createUser(1L);
-
-            given(connectCodeRepository.findByUserId(1L)).willReturn(Optional.empty());
             given(userRepository.findById(1L)).willReturn(Optional.of(user));
-            given(connectCodeRepository.save(any(ConnectCode.class)))
-                    .willAnswer(invocation -> {
-                        ConnectCode code = invocation.getArgument(0);
-                        setId(code, 20L);
-                        return code;
-                    });
 
             CodeGenerateResponse response = codeService.generateCode(1L);
 
-            assertThat(response.code()).hasSize(8);
-            assertThat(response.id()).isEqualTo(20L);
-            verify(connectCodeRepository).save(any(ConnectCode.class));
+            assertThat(response.code()).isEqualTo("ABC123");
         }
 
         @Test
         @DisplayName("존재하지 않는 사용자 - USER_NOT_FOUND")
         void userNotFound() {
-            given(connectCodeRepository.findByUserId(999L)).willReturn(Optional.empty());
             given(userRepository.findById(999L)).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> codeService.generateCode(999L))
@@ -113,26 +80,29 @@ class CodeServiceTest {
     class RegenerateCode {
 
         @Test
-        @DisplayName("기존 코드 삭제 후 새 코드 생성")
-        void deletesOldAndCreatesNew() {
-            User user = createUser(1L);
-            ConnectCode existing = ConnectCode.builder()
-                    .user(user).code("OLD12345").used(false).build();
+        @DisplayName("새 코드로 변경")
+        void regeneratesCode() {
+            User user = createUser(1L, "OLD123");
 
-            given(connectCodeRepository.findByUserId(1L)).willReturn(Optional.of(existing));
             given(userRepository.findById(1L)).willReturn(Optional.of(user));
-            given(connectCodeRepository.save(any(ConnectCode.class)))
-                    .willAnswer(invocation -> {
-                        ConnectCode code = invocation.getArgument(0);
-                        setId(code, 30L);
-                        return code;
-                    });
+            given(userRepository.existsByCode(anyString())).willReturn(false);
 
             CodeGenerateResponse response = codeService.regenerateCode(1L);
 
-            verify(connectCodeRepository).delete(existing);
-            assertThat(response.code()).hasSize(8);
-            assertThat(response.code()).isNotEqualTo("OLD12345");
+            assertThat(response.code()).hasSize(6);
+            assertThat(response.code()).isNotEqualTo("OLD123");
+            assertThat(user.getCode()).isEqualTo(response.code());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 사용자 - USER_NOT_FOUND")
+        void userNotFound() {
+            given(userRepository.findById(999L)).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> codeService.regenerateCode(999L))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
+                            .isEqualTo(ErrorCode.USER_NOT_FOUND));
         }
     }
 
@@ -143,59 +113,24 @@ class CodeServiceTest {
         @Test
         @DisplayName("유효한 코드 검증 성공")
         void success() {
-            User user = createUser(1L);
-            ConnectCode code = ConnectCode.builder()
-                    .user(user).code("VALID123").used(false).build();
-            setId(code, 5L);
+            User user = createUser(1L, "VALID1");
 
-            given(connectCodeRepository.findByCode("VALID123")).willReturn(Optional.of(code));
+            given(userRepository.findByCode("VALID1")).willReturn(Optional.of(user));
 
-            CodeVerifyResponse response = codeService.verifyCode("VALID123");
+            CodeVerifyResponse response = codeService.verifyCode("VALID1");
 
             assertThat(response.userId()).isEqualTo(1L);
-            assertThat(response.codeId()).isEqualTo(5L);
         }
 
         @Test
         @DisplayName("존재하지 않는 코드 - CODE_NOT_FOUND")
         void codeNotFound() {
-            given(connectCodeRepository.findByCode("NOPE")).willReturn(Optional.empty());
+            given(userRepository.findByCode("NOPE")).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> codeService.verifyCode("NOPE"))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
                             .isEqualTo(ErrorCode.CODE_NOT_FOUND));
-        }
-
-        @Test
-        @DisplayName("만료된 코드 - CODE_EXPIRED")
-        void codeExpired() {
-            User user = createUser(1L);
-            ConnectCode code = ConnectCode.builder()
-                    .user(user).code("EXPRD123").used(false)
-                    .expiresAt(LocalDateTime.now().minusDays(1)).build();
-
-            given(connectCodeRepository.findByCode("EXPRD123")).willReturn(Optional.of(code));
-
-            assertThatThrownBy(() -> codeService.verifyCode("EXPRD123"))
-                    .isInstanceOf(BusinessException.class)
-                    .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
-                            .isEqualTo(ErrorCode.CODE_EXPIRED));
-        }
-
-        @Test
-        @DisplayName("이미 사용된 코드 - CODE_ALREADY_USED")
-        void codeAlreadyUsed() {
-            User user = createUser(1L);
-            ConnectCode code = ConnectCode.builder()
-                    .user(user).code("USED1234").used(true).build();
-
-            given(connectCodeRepository.findByCode("USED1234")).willReturn(Optional.of(code));
-
-            assertThatThrownBy(() -> codeService.verifyCode("USED1234"))
-                    .isInstanceOf(BusinessException.class)
-                    .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
-                            .isEqualTo(ErrorCode.CODE_ALREADY_USED));
         }
     }
 }

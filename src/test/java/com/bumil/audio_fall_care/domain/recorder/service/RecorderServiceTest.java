@@ -1,7 +1,5 @@
 package com.bumil.audio_fall_care.domain.recorder.service;
 
-import com.bumil.audio_fall_care.domain.code.entity.ConnectCode;
-import com.bumil.audio_fall_care.domain.code.repository.ConnectCodeRepository;
 import com.bumil.audio_fall_care.domain.history.repository.FallHistoryRepository;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderRegisterRequest;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderResponse;
@@ -10,6 +8,7 @@ import com.bumil.audio_fall_care.domain.recorder.entity.Recorder;
 import com.bumil.audio_fall_care.domain.recorder.entity.RecorderStatus;
 import com.bumil.audio_fall_care.domain.recorder.repository.RecorderRepository;
 import com.bumil.audio_fall_care.domain.user.entity.User;
+import com.bumil.audio_fall_care.domain.user.repository.UserRepository;
 import com.bumil.audio_fall_care.global.common.BusinessException;
 import com.bumil.audio_fall_care.global.common.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +29,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class   RecorderServiceTest {
+class RecorderServiceTest {
 
     @InjectMocks
     private RecorderService recorderService;
@@ -40,7 +38,7 @@ class   RecorderServiceTest {
     private RecorderRepository recorderRepository;
 
     @Mock
-    private ConnectCodeRepository connectCodeRepository;
+    private UserRepository userRepository;
 
     @Mock
     private FallHistoryRepository fallHistoryRepository;
@@ -49,6 +47,7 @@ class   RecorderServiceTest {
         User user = User.builder()
                 .username("testuser")
                 .password("password")
+                .code("ABC123")
                 .build();
         setId(user, id);
         return user;
@@ -65,11 +64,13 @@ class   RecorderServiceTest {
     }
 
     private Recorder createRecorder(Long id, User user) {
-        return Recorder.builder()
+        Recorder recorder = Recorder.builder()
                 .user(user)
                 .deviceName("거실 리코더")
                 .status(RecorderStatus.CONNECTED)
                 .build();
+        setId(recorder, id);
+        return recorder;
     }
 
     @Nested
@@ -79,34 +80,25 @@ class   RecorderServiceTest {
         @Test
         @DisplayName("유효한 연결 코드로 리코더 등록 성공")
         void success() {
-            // given
             User user = createUser(1L);
-            ConnectCode connectCode = ConnectCode.builder()
-                    .user(user)
-                    .code("ABC123")
-                    .used(false)
-                    .build();
 
-            given(connectCodeRepository.findByCode("ABC123"))
-                    .willReturn(Optional.of(connectCode));
+            given(userRepository.findByCode("ABC123"))
+                    .willReturn(Optional.of(user));
             given(recorderRepository.save(any(Recorder.class)))
                     .willAnswer(invocation -> invocation.getArgument(0));
 
-            // when
             RecorderResponse response = recorderService.registerRecorder(
                     new RecorderRegisterRequest("ABC123"));
 
-            // then
             assertThat(response).isNotNull();
             assertThat(response.status()).isEqualTo(RecorderStatus.CONNECTED);
-            assertThat(connectCode.getUsed()).isTrue();
             verify(recorderRepository).save(any(Recorder.class));
         }
 
         @Test
         @DisplayName("존재하지 않는 연결 코드 - CODE_NOT_FOUND")
         void codeNotFound() {
-            given(connectCodeRepository.findByCode("INVALID"))
+            given(userRepository.findByCode("INVALID"))
                     .willReturn(Optional.empty());
 
             assertThatThrownBy(() ->
@@ -114,47 +106,6 @@ class   RecorderServiceTest {
                     .isInstanceOf(BusinessException.class)
                     .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
                             .isEqualTo(ErrorCode.CODE_NOT_FOUND));
-        }
-
-        @Test
-        @DisplayName("이미 사용된 연결 코드 - CODE_ALREADY_USED")
-        void codeAlreadyUsed() {
-            User user = createUser(1L);
-            ConnectCode connectCode = ConnectCode.builder()
-                    .user(user)
-                    .code("USED01")
-                    .used(true)
-                    .build();
-
-            given(connectCodeRepository.findByCode("USED01"))
-                    .willReturn(Optional.of(connectCode));
-
-            assertThatThrownBy(() ->
-                    recorderService.registerRecorder(new RecorderRegisterRequest("USED01")))
-                    .isInstanceOf(BusinessException.class)
-                    .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
-                            .isEqualTo(ErrorCode.CODE_ALREADY_USED));
-        }
-
-        @Test
-        @DisplayName("만료된 연결 코드 - CODE_EXPIRED")
-        void codeExpired() {
-            User user = createUser(1L);
-            ConnectCode connectCode = ConnectCode.builder()
-                    .user(user)
-                    .code("EXPRD1")
-                    .used(false)
-                    .expiresAt(LocalDateTime.now().minusDays(1))
-                    .build();
-
-            given(connectCodeRepository.findByCode("EXPRD1"))
-                    .willReturn(Optional.of(connectCode));
-
-            assertThatThrownBy(() ->
-                    recorderService.registerRecorder(new RecorderRegisterRequest("EXPRD1")))
-                    .isInstanceOf(BusinessException.class)
-                    .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
-                            .isEqualTo(ErrorCode.CODE_EXPIRED));
         }
     }
 

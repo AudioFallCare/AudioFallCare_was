@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // 400
-    VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "VERIFICATION_CODE_EXPIRED", "인증번호가 만료되었습니다."),
-    INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_CODE", "인증번호가 일치하지 않습니다."),
     MISMATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "MISMATCHED_PASSWORD", "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
     CODE_EXPIRED(HttpStatus.BAD_REQUEST, "CODE_EXPIRED", "만료된 연결 코드입니다."),
     CODE_ALREADY_USED(HttpStatus.BAD_REQUEST, "CODE_ALREADY_USED", "이미 사용된 연결 코드입니다."),
@@ -44,14 +42,11 @@ public enum ErrorCode {
 
     // 409
     DUPLICATED_USERNAME(HttpStatus.CONFLICT, "DUPLICATED_USERNAME", "이미 가입된 아이디입니다."),
-    DUPLICATED_EMAIL(HttpStatus.CONFLICT, "DUPLICATED_EMAIL", "이미 가입된 이메일입니다."),
 
     // 500
     FIREBASE_INITIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FIREBASE_INIT_FAILED", "Firebase 초기화에 실패했습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "서버 오류가 발생했습니다."),
-    REDIS_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "REDIS_CONNECTION_ERROR", "Redis 연결에 실패했습니다."),
-    EMAIL_CREATE_MESSAGE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EMAIL_CREATE_MESSAGE_FAILED", "이메일 메시지를 생성하는데 실패했습니다"),
-    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EMAIL_SEND_FAILED", "이메일 발송에 실패했습니다.");
+    REDIS_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "REDIS_CONNECTION_ERROR", "Redis 연결에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

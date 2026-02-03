@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Long signUp(SignUpRequest dto) {
+    public User signUp(SignUpRequest dto) {
         if (!dto.password().equals(dto.passwordConfirm())) {
             throw new BusinessException(ErrorCode.MISMATCHED_PASSWORD);
         }
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
                 .code(code)
                 .build();
 
-        return  userRepository.save(user).getId();
+        return  userRepository.save(user);
     }
 
 

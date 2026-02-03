@@ -1,8 +1,7 @@
 package com.bumil.audio_fall_care.domain.auth.dto.response;
 
-public record LoginResponse(
+public record SignUpResponse(
         Long userId,
-        String username,
-        String accessToken
+        String code
 ) {
 }

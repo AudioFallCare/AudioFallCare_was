@@ -2,6 +2,7 @@ package com.bumil.audio_fall_care.domain.recorder.service;
 
 import com.bumil.audio_fall_care.domain.code.entity.ConnectCode;
 import com.bumil.audio_fall_care.domain.code.repository.ConnectCodeRepository;
+import com.bumil.audio_fall_care.domain.history.repository.FallHistoryRepository;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderRegisterRequest;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderResponse;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderUpdateRequest;
@@ -26,6 +27,7 @@ public class RecorderService {
 
     private final RecorderRepository recorderRepository;
     private final ConnectCodeRepository connectCodeRepository;
+    private final FallHistoryRepository fallHistoryRepository;
 
     @Transactional
     public RecorderResponse registerRecorder(RecorderRegisterRequest request) {
@@ -86,6 +88,7 @@ public class RecorderService {
             throw new BusinessException(ErrorCode.RECORDER_NOT_OWNED);
         }
 
+        fallHistoryRepository.deleteAllByRecorderId(recorderId);
         recorderRepository.delete(recorder);
     }
 

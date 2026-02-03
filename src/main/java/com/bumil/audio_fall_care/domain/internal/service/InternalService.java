@@ -11,6 +11,8 @@ import com.bumil.audio_fall_care.domain.internal.dto.FallDetectionResponse;
 import com.bumil.audio_fall_care.domain.recorder.entity.Recorder;
 import com.bumil.audio_fall_care.domain.recorder.repository.RecorderRepository;
 import com.bumil.audio_fall_care.domain.user.entity.User;
+import com.bumil.audio_fall_care.global.common.BusinessException;
+import com.bumil.audio_fall_care.global.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,8 +42,7 @@ public class InternalService {
     public FallDetectionResponse processFallDetection(FallDetectionRequest request) {
         // 1. Recorder 조회
         Recorder recorder = recorderRepository.findById(request.recorderId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "존재하지 않는 리코더입니다: " + request.recorderId()));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECORDER_NOT_FOUND));
 
         User user = recorder.getUser();
         LocalDateTime detectedAt = request.detectedAt() != null ? request.detectedAt() : LocalDateTime.now();

@@ -11,6 +11,8 @@ import com.bumil.audio_fall_care.domain.recorder.entity.Recorder;
 import com.bumil.audio_fall_care.domain.recorder.entity.RecorderStatus;
 import com.bumil.audio_fall_care.domain.recorder.repository.RecorderRepository;
 import com.bumil.audio_fall_care.domain.user.entity.User;
+import com.bumil.audio_fall_care.global.common.BusinessException;
+import com.bumil.audio_fall_care.global.common.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,13 +104,15 @@ class InternalServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 리코더 ID - IllegalArgumentException")
+    @DisplayName("존재하지 않는 리코더 ID - BusinessException(RECORDER_NOT_FOUND)")
     void recorderNotFound() {
         given(recorderRepository.findById(999L)).willReturn(Optional.empty());
 
         FallDetectionRequest request = new FallDetectionRequest(999L, 0.9, "thud", null);
 
         assertThatThrownBy(() -> internalService.processFallDetection(request))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.RECORDER_NOT_FOUND));
     }
 }

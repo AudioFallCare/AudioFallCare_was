@@ -17,4 +17,6 @@ public interface FallHistoryRepository extends JpaRepository<FallHistory, Long> 
 
     @Query("SELECT COALESCE(AVG(h.confidence), 0) FROM FallHistory h WHERE h.user.id = :userId")
     double findAverageConfidenceByUserId(@Param("userId") Long userId);
+
+    void deleteAllByRecorderId(Long recorderId);
 }

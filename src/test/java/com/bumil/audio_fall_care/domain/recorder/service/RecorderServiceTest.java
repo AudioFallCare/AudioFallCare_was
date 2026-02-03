@@ -2,6 +2,7 @@ package com.bumil.audio_fall_care.domain.recorder.service;
 
 import com.bumil.audio_fall_care.domain.code.entity.ConnectCode;
 import com.bumil.audio_fall_care.domain.code.repository.ConnectCodeRepository;
+import com.bumil.audio_fall_care.domain.history.repository.FallHistoryRepository;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderRegisterRequest;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderResponse;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderUpdateRequest;
@@ -40,6 +41,9 @@ class   RecorderServiceTest {
 
     @Mock
     private ConnectCodeRepository connectCodeRepository;
+
+    @Mock
+    private FallHistoryRepository fallHistoryRepository;
 
     private User createUser(Long id) {
         User user = User.builder()

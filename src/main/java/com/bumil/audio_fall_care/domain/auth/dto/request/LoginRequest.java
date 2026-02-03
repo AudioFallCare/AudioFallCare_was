@@ -9,7 +9,7 @@ public record LoginRequest(
         @NotBlank(message = "비밀번호를 입력하세요.")
         String password,
 
-        @NotBlank
+        @NotBlank(message = "디바이스 정보를 입력하세요.")
         String deviceInfo
 ) {
 }

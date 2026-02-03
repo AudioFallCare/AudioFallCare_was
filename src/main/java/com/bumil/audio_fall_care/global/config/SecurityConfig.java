@@ -1,5 +1,6 @@
 package com.bumil.audio_fall_care.global.config;
 
+import com.bumil.audio_fall_care.global.security.InternalApiKeyFilter;
 import com.bumil.audio_fall_care.global.security.jwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final InternalApiKeyFilter internalApiKeyFilter;
     private final AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
@@ -57,12 +59,14 @@ public class SecurityConfig {
                                 "/api/auth/refresh"
                         ).permitAll()
                         .requestMatchers("/api/code/verify").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/recorders").permitAll()
                         .requestMatchers("/health").permitAll()
                         // Swagger
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**").permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(internalApiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

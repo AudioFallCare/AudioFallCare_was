@@ -14,6 +14,7 @@ public enum ErrorCode {
     MISMATCHED_PASSWORD(HttpStatus.BAD_REQUEST, "MISMATCHED_PASSWORD", "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
     CODE_EXPIRED(HttpStatus.BAD_REQUEST, "CODE_EXPIRED", "만료된 연결 코드입니다."),
     CODE_ALREADY_USED(HttpStatus.BAD_REQUEST, "CODE_ALREADY_USED", "이미 사용된 연결 코드입니다."),
+    INVALID_API_KEY(HttpStatus.UNAUTHORIZED, "INVALID_API_KEY", "유효하지 않은 API 키입니다."),
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "요청 값이 유효하지 않습니다."),
     UNREADABLE_JSON(HttpStatus.BAD_REQUEST, "UNREADABLE_JSON", "요청 본문을 읽을 수 없습니다."),
 

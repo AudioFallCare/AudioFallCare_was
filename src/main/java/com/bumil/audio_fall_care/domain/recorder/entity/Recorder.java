@@ -21,7 +21,6 @@ public class Recorder extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
     private String deviceName;
 
     @Enumerated(EnumType.STRING)
@@ -31,5 +30,9 @@ public class Recorder extends BaseTimeEntity {
 
     public void updateStatus(RecorderStatus status) {
         this.status = status;
+    }
+
+    public void updateDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 }

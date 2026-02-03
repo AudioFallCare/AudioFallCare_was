@@ -44,7 +44,7 @@ public class InternalService {
                         "존재하지 않는 리코더입니다: " + request.recorderId()));
 
         User user = recorder.getUser();
-        LocalDateTime detectedAt = LocalDateTime.now();
+        LocalDateTime detectedAt = request.detectedAt() != null ? request.detectedAt() : LocalDateTime.now();
 
         // 2. FallHistory 저장
         FallHistory history = FallHistory.builder()

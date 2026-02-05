@@ -25,6 +25,20 @@ public class CodeController {
 
     private final CodeService codeService;
 
+    @Operation(summary = "연결 코드 조회", description = "현재 사용자의 연결 코드를 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "코드 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요")
+    })
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<CodeGenerateResponse>> getCode(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        CodeGenerateResponse response = codeService.generateCode(userDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
     @Operation(summary = "연결 코드 발급", description = "기존 코드가 있으면 기존 코드를 반환하고, 없으면 새로 발급합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "코드 반환/발급 성공"),

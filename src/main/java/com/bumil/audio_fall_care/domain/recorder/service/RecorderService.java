@@ -4,6 +4,7 @@ import com.bumil.audio_fall_care.domain.history.repository.FallHistoryRepository
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderRegisterRequest;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderResponse;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderUpdateRequest;
+import com.bumil.audio_fall_care.domain.recorder.dto.RecorderUserResponse; // Import new DTO
 import com.bumil.audio_fall_care.domain.recorder.entity.Recorder;
 import com.bumil.audio_fall_care.domain.recorder.entity.RecorderStatus;
 import com.bumil.audio_fall_care.domain.recorder.repository.RecorderRepository;
@@ -87,5 +88,17 @@ public class RecorderService {
         }
 
         return RecorderResponse.from(recorder);
+    }
+
+    // New method to get the user associated with a recorder
+    public RecorderUserResponse getRecorderUser(Long recorderId) {
+        Recorder recorder = recorderRepository.findById(recorderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECORDER_NOT_FOUND));
+
+        User user = recorder.getUser();
+        return RecorderUserResponse.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .build();
     }
 }

@@ -3,9 +3,10 @@ package com.bumil.audio_fall_care.domain.recorder.controller;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderRegisterRequest;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderResponse;
 import com.bumil.audio_fall_care.domain.recorder.dto.RecorderUpdateRequest;
+import com.bumil.audio_fall_care.domain.recorder.dto.RecorderUserResponse; // Import new DTO
 import com.bumil.audio_fall_care.domain.recorder.service.RecorderService;
 import com.bumil.audio_fall_care.global.common.ApiResponse;
-import com.bumil.audio_fall_care.global.security.CustomUserDetails;
+import com.bumil.audio_fall_care.global.security.CustomUserDetails; // Keep CustomUserDetails for other methods
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -95,5 +96,18 @@ public class RecorderController {
 
         RecorderResponse recorder = recorderService.getRecorderStatus(userDetails.getUserId(), id);
         return ResponseEntity.ok(ApiResponse.ok(recorder));
+    }
+
+    @Operation(summary = "리코더와 연결된 사용자 정보 조회", description = "특정 리코더에 연결된 사용자의 정보를 조회합니다. 이 사용자는 리코더의 보호자로 간주됩니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "리코더를 찾을 수 없음")
+    })
+    @GetMapping("/{recorderId}/user")
+    public ResponseEntity<ApiResponse<RecorderUserResponse>> getRecorderUser(
+            @PathVariable Long recorderId) {
+
+        RecorderUserResponse recorderUserResponse = recorderService.getRecorderUser(recorderId);
+        return ResponseEntity.ok(ApiResponse.ok(recorderUserResponse));
     }
 }

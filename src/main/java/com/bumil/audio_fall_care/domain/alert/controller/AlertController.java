@@ -1,6 +1,7 @@
 package com.bumil.audio_fall_care.domain.alert.controller;
 
 import com.bumil.audio_fall_care.domain.alert.dto.response.AlertResponse;
+import com.bumil.audio_fall_care.domain.alert.entity.FallDiff;
 import com.bumil.audio_fall_care.domain.alert.service.AlertService;
 import com.bumil.audio_fall_care.global.common.ApiResponse;
 import com.bumil.audio_fall_care.global.security.CustomUserDetails;
@@ -51,6 +52,21 @@ public class AlertController {
     public ResponseEntity<ApiResponse<Long>> countUnreadAlerts(@AuthenticationPrincipal CustomUserDetails userDetails) {
         long count = alertService.countUnreadAlerts(userDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.ok(count));
+    }
+
+    @Operation(
+            summary = "지난달 대비 낙상 발생 빈도 비교 조회",
+            description = "로그인한 사용자와 연결된 리코더의 지난달과 이번달 낙상 발생 건수를 비교하여 증감 정보를 반환합니다"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/fall-diff")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<FallDiff>> compareLastMonth(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        FallDiff fallDiff = alertService.compareToLastMonth(userDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.ok(fallDiff));
     }
 
     @Operation(

@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface RecorderRepository extends JpaRepository<Recorder, Long> {
     List<Recorder> findByUserId(Long userId);
+    boolean existsByUserId(Long userId);
 }

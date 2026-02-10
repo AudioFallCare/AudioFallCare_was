@@ -34,6 +34,11 @@ public class RecorderService {
         User user = userRepository.findByCode(request.code())
                 .orElseThrow(() -> new BusinessException(ErrorCode.CODE_NOT_FOUND));
 
+        // 보호자 중복 등록 검사
+        if (recorderRepository.existsByUserId(user.getId())) {
+            throw new BusinessException(ErrorCode.DUPLICATED_GUARDIAN);
+        }
+
         Recorder recorder = Recorder.builder()
                 .user(user)
                 .status(RecorderStatus.CONNECTED)

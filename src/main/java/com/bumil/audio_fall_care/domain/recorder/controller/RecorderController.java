@@ -30,7 +30,8 @@ public class RecorderController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "등록 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "유효하지 않은 연결 코드"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "연결 코드를 찾을 수 없음")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "연결 코드를 찾을 수 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 보호자로 등록된 사용자")
     })
     @PostMapping
     public ResponseEntity<ApiResponse<RecorderResponse>> registerRecorder(

@@ -59,10 +59,9 @@ public class InternalService {
 
         // 3. Alert 생성
         String alertMessage = String.format(
-                "[낙상 감지] %s에서 낙상이 감지되었습니다. (신뢰도: %.0f%%, 소리 유형: %s)",
+                "[낙상 감지] %s에서 낙상이 감지되었습니다. (신뢰도: %.0f%%)",
                 recorder.getDeviceName(),
-                request.confidence() * 100,
-                request.soundType()
+                request.confidence() * 100
         );
 
         Alert alert = Alert.builder()

@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/api/auth/signup",
                                 "/api/auth/login",
                                 "/api/auth/refresh",
-                                "/api/internal/fall"
+                                "/api/internal/fall",
+                                "/api/recorders/**"
                         ).permitAll()
                         .requestMatchers("/api/code/verify").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/recorders").permitAll()

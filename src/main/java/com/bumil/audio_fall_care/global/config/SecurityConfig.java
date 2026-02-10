@@ -55,7 +55,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/signup",
                                 "/api/auth/login",
-                                "/api/auth/refresh"
+                                "/api/auth/refresh",
+                                "/api/internal/fall"
                         ).permitAll()
                         .requestMatchers("/api/code/verify").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/recorders").permitAll()
@@ -77,7 +78,9 @@ public class SecurityConfig {
 
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
-                "https://*.vercel.app"
+                "https://*.vercel.app",
+                "https://audiofallcare-ai-test.onrender.com/"
+
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

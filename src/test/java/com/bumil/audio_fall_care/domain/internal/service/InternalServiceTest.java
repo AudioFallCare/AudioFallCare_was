@@ -75,7 +75,7 @@ class InternalServiceTest {
         given(alertRepository.save(any(Alert.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
 
-        FallDetectionRequest request = new FallDetectionRequest(1L, 0.95, "thud", customTime);
+        FallDetectionRequest request = new FallDetectionRequest(1L, 1L, 0.95, "thud", customTime);
         FallDetectionResponse response = internalService.processFallDetection(request);
 
         assertThat(response.detectedAt()).isEqualTo(customTime);
@@ -96,7 +96,7 @@ class InternalServiceTest {
         given(alertRepository.save(any(Alert.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
 
-        FallDetectionRequest request = new FallDetectionRequest(1L, 0.85, "crash", null);
+        FallDetectionRequest request = new FallDetectionRequest(1L, 1L, 0.85, "crash", null);
         FallDetectionResponse response = internalService.processFallDetection(request);
 
         LocalDateTime after = LocalDateTime.now();
@@ -108,7 +108,7 @@ class InternalServiceTest {
     void recorderNotFound() {
         given(recorderRepository.findById(999L)).willReturn(Optional.empty());
 
-        FallDetectionRequest request = new FallDetectionRequest(999L, 0.9, "thud", null);
+        FallDetectionRequest request = new FallDetectionRequest(999L, 999L, 0.9, "thud", null);
 
         assertThatThrownBy(() -> internalService.processFallDetection(request))
                 .isInstanceOf(BusinessException.class)

@@ -17,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -51,10 +49,10 @@ public class RecorderService {
         return RecorderResponse.from(recorder);
     }
 
-    public List<RecorderResponse> getRecorders(Long userId) {
-        return recorderRepository.findByUserId(userId).stream()
+    public RecorderResponse getRecorder(Long userId) {
+        return recorderRepository.findByUserId(userId)
                 .map(RecorderResponse::from)
-                .toList();
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECORDER_NOT_FOUND));
     }
 
     @Transactional

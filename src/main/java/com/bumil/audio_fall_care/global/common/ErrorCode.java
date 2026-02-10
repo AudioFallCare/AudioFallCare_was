@@ -42,6 +42,7 @@ public enum ErrorCode {
 
     // 409
     DUPLICATED_USERNAME(HttpStatus.CONFLICT, "DUPLICATED_USERNAME", "이미 가입된 아이디입니다."),
+    DUPLICATED_GUARDIAN(HttpStatus.CONFLICT, "DUPLICATED_GUARDIAN", "이미 등록된 보호자입니다."),
 
     // 500
     FIREBASE_INITIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FIREBASE_INIT_FAILED", "Firebase 초기화에 실패했습니다."),

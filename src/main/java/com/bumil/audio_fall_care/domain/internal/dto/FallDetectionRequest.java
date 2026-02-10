@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record FallDetectionRequest(
+        @NotNull(message = "guardianId는 필수입니다")
+        Long guardianId,
 
         @NotNull(message = "recorderId는 필수입니다")
         Long recorderId,

@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,11 +34,6 @@ public class RecorderService {
         User user = userRepository.findByCode(request.code())
                 .orElseThrow(() -> new BusinessException(ErrorCode.CODE_NOT_FOUND));
 
-        // 보호자 중복 등록 검사
-        if (recorderRepository.existsByUserId(user.getId())) {
-            throw new BusinessException(ErrorCode.DUPLICATED_GUARDIAN);
-        }
-
         Recorder recorder = Recorder.builder()
                 .user(user)
                 .status(RecorderStatus.CONNECTED)
@@ -49,10 +46,10 @@ public class RecorderService {
         return RecorderResponse.from(recorder);
     }
 
-    public RecorderResponse getRecorder(Long userId) {
-        return recorderRepository.findByUserId(userId)
+    public List<RecorderResponse> getRecorders(Long userId) {
+        return recorderRepository.findByUserId(userId).stream()
                 .map(RecorderResponse::from)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RECORDER_NOT_FOUND));
+                .toList();
     }
 
     @Transactional

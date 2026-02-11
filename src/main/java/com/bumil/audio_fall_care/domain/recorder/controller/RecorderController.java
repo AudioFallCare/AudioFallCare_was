@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "리코더", description = "리코더 관리 API")
 @RestController
 @RequestMapping("/api/recorders")
@@ -28,8 +30,7 @@ public class RecorderController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "등록 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "유효하지 않은 연결 코드"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "연결 코드를 찾을 수 없음"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 보호자로 등록된 사용자")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "연결 코드를 찾을 수 없음")
     })
     @PostMapping
     public ResponseEntity<ApiResponse<RecorderResponse>> registerRecorder(
@@ -39,16 +40,16 @@ public class RecorderController {
         return ResponseEntity.ok(ApiResponse.ok(recorder));
     }
 
-    @Operation(summary = "연결된 리코더 조회", description = "로그인한 사용자의 연결된 리코더를 조회합니다.")
+    @Operation(summary = "연결된 리코더 목록 조회", description = "로그인한 사용자의 연결된 리코더 목록을 조회합니다.")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "연결된 리코더 없음")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
     })
     @GetMapping
-    public ResponseEntity<ApiResponse<RecorderResponse>> getRecorder(
-    @AuthenticationPrincipal CustomUserDetails userDetails) {
-        RecorderResponse recorder = recorderService.getRecorder(userDetails.getUserId());
-        return ResponseEntity.ok(ApiResponse.ok(recorder));
+    public ResponseEntity<ApiResponse<List<RecorderResponse>>> getRecorders(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        List<RecorderResponse> recorders = recorderService.getRecorders(userDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.ok(recorders));
     }
 
     @Operation(summary = "리코더 정보 수정", description = "리코더의 디바이스 이름을 설정합니다.")
